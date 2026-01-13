@@ -11,6 +11,8 @@
     --join-hover-color: #0096FF;
     --leave-color: #B90000;
     --leave-hover-color: #FF5733;
+    --upload-color: #40be70;
+    --upload-hover-color: #4aed88;
 }
 
 body {
@@ -211,6 +213,140 @@ footer a:hover {
     line-height: 1.6;
     padding-top: 20px;
 }
+
+.uploadFileBtn {
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    background-color: var(--upload-color);
+    color: white;
+    margin-top: 10px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+.uploadFileBtn:hover {
+    background-color: var(--upload-hover-color);
+    color: var(--copy-text);
+}
+
+.filePreview {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Modal container */
+.filePreviewContainer {
+  width: min(900px, 90vw);
+  max-height: 90vh;
+
+  background: #1e1e2e;
+  color: #e6e6e6;
+
+  border-radius: 10px;
+  padding: 16px;
+
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Header */
+.filePreviewContainer h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #cdd6f4;
+  border-bottom: 1px solid #313244;
+  padding-bottom: 8px;
+}
+
+/* Code preview */
+.filePreviewContainer pre {
+  background: #11111b;
+  border-radius: 6px;
+  padding: 12px;
+  overflow-y: auto;
+  max-height: 60vh;
+
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+
+  border: 1px solid #313244;
+}
+
+/* Optional scrollbar styling */
+.filePreviewContainer pre::-webkit-scrollbar {
+  width: 8px;
+}
+
+.filePreviewContainer pre::-webkit-scrollbar-thumb {
+  background: #45475a;
+  border-radius: 4px;
+}
+
+/* Buttons container */
+.filePreviewContainer > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* Base button */
+.filePreviewContainer button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+/* Append */
+#appendBtn {
+  background: #3b82f6;
+  color: white;
+}
+
+#appendBtn:hover {
+  background: #2563eb;
+}
+
+/* Replace */
+#replaceBtn {
+  background: #ef4444;
+  color: white;
+}
+
+#replaceBtn:hover {
+  background: #dc2626;
+}
+
+/* Cancel */
+#cancelBtn {
+  background: transparent;
+  color: #cdd6f4;
+  border: 1px solid #45475a;
+}
+
+#cancelBtn:hover {
+  background: #313244;
+}
+
 
 @media screen and (min-width: 480px) {
     .CodeMirror {

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import Client from "../components/Client";
 import Editor from "../components/Editor";
+import FilePreview from "../components/FilePreview";
 import { language, cmtheme } from "../../src/atoms";
 import { useRecoilState } from "recoil";
 import ACTIONS from "../actions/Actions";
@@ -24,6 +25,11 @@ const EditorPage = () => {
   const location = useLocation();
   const { roomId } = useParams();
   const reactNavigator = useNavigate();
+
+  const [filePreview, setFilePreview] = useState(false);
+  const [fileContent, setFileContent] = useState("");
+  const fileInputRef = useRef(null);
+  const editorInstanceRef = useRef(null);
 
   useEffect(() => {
     const init = async () => {
@@ -92,6 +98,54 @@ const EditorPage = () => {
     return <Navigate to="/" />;
   }
 
+  function handleFileUpload(event) {
+    console.log("hello");
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const fileContent = e.target.result;
+        setFileContent(fileContent);
+        setFilePreview(true);
+      };
+      reader.readAsText(file);
+    }
+  }
+  const resetFileInput = () => {
+    if (fileInputRef.current) {
+    fileInputRef.current.value = "";
+    }
+  };
+
+  const updateEditorCode = (newCode) => {
+    editorInstanceRef.current?.setCode(newCode);
+    codeRef.current = newCode;
+    socketRef.current.emit(ACTIONS.CODE_CHANGE, {
+      roomId,
+      code: newCode,
+    });
+  };
+
+  const handleAppendCode = () => {
+  const currentCode = codeRef.current || "";
+
+  const appendedCode = currentCode
+    ? `${currentCode}\n\n${fileContent}`
+    : fileContent;
+
+    updateEditorCode(appendedCode);
+    setFilePreview(false);
+    resetFileInput();
+  };
+
+  const handleReplaceCode = () => {
+    updateEditorCode(fileContent);
+    setFilePreview(false);
+    resetFileInput();
+  };
+
+
+
   return (
     <div className="mainWrap">
       <div className="aside">
@@ -106,6 +160,19 @@ const EditorPage = () => {
             ))}
           </div>
         </div>
+
+        <input type="file" accept=".js,.py,.java,.cpp,.c,.txt,.html,.css" style={{ display: "none" }} id="fileUpload" onChange={handleFileUpload} ref={fileInputRef} />
+        <button className="uploadFileBtn" onClick={() => document.getElementById("fileUpload").click()}>
+          Upload File
+        </button>
+        {
+          filePreview && <FilePreview 
+            setFilePreview={setFilePreview}
+            fileContent={fileContent}
+            resetFileInput={resetFileInput}
+            onAppend={handleAppendCode}
+            onReplace={handleReplaceCode}/>
+        }
 
         <label>
           Select Language:
@@ -230,6 +297,7 @@ const EditorPage = () => {
 
       <div className="editorWrap">
         <Editor
+          ref={editorInstanceRef}
           socketRef={socketRef}
           roomId={roomId}
           onCodeChange={(code) => {
