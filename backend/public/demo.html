@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SyncCode Backend — Live API Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #0f1117;
+      --surface:  #1a1d27;
+      --card:     #20243a;
+      --border:   #2e3250;
+      --accent:   #6366f1;
+      --accent2:  #10b981;
+      --yellow:   #f59e0b;
+      --red:      #ef4444;
+      --text:     #e2e8f0;
+      --muted:    #8892b0;
+      --code-bg:  #0d1117;
+      --radius:   12px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ── Header ────────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+    .logo span { color: var(--text); font-weight: 400; }
+    .header-links { display: flex; gap: 1rem; }
+    .header-links a {
+      color: var(--muted); text-decoration: none; font-size: 0.85rem;
+      padding: 6px 14px; border-radius: 8px; transition: all .2s;
+    }
+    .header-links a:hover { color: var(--text); background: var(--card); }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge.green { background: rgba(16,185,129,.15); color: var(--accent2); }
+    .badge.purple { background: rgba(99,102,241,.15); color: var(--accent); }
+
+    /* ── Hero ──────────────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 4rem 2rem 2rem;
+      background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,.12) 0%, transparent 70%);
+    }
+    .hero h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: .5rem; }
+    .hero h1 span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { color: var(--muted); font-size: 1rem; margin-bottom: 1.5rem; }
+    .hero-tags { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+    .tag {
+      padding: 4px 12px; border: 1px solid var(--border); border-radius: 20px;
+      font-size: 0.78rem; color: var(--muted); transition: all .2s;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* ── Card ──────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: box-shadow .2s;
+    }
+    .card:hover { box-shadow: 0 0 0 1px rgba(99,102,241,.2), 0 8px 32px rgba(0,0,0,.3); }
+    .card-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card);
+    }
+    .card-title { font-size: .9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .card-body { padding: 1.25rem; }
+
+    /* ── Forms ─────────────────────────────────────────────────── */
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; font-size: .8rem; font-weight: 500; color: var(--muted); margin-bottom: 4px; }
+    input, select {
+      width: 100%; padding: 9px 12px;
+      background: var(--code-bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: inherit; font-size: .9rem;
+      transition: border-color .2s;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
+
+    /* ── Buttons ───────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 20px; border: none; border-radius: 8px;
+      font-family: inherit; font-size: .88rem; font-weight: 600;
+      cursor: pointer; transition: all .18s; white-space: nowrap;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #4f46e5; transform: translateY(-1px); }
+    .btn-success { background: var(--accent2); color: #fff; }
+    .btn-success:hover { background: #059669; transform: translateY(-1px); }
+    .btn-danger  { background: var(--red); color: #fff; }
+    .btn-danger:hover  { background: #dc2626; transform: translateY(-1px); }
+    .btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--text); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .btn-row { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: .5rem; }
+
+    /* ── Method badges ─────────────────────────────────────────── */
+    .method { padding: 3px 8px; border-radius: 5px; font-size: .72rem; font-weight: 700; font-family: monospace; }
+    .GET    { background: rgba(16,185,129,.15); color: var(--accent2); }
+    .POST   { background: rgba(99,102,241,.15); color: var(--accent); }
+    .PATCH  { background: rgba(245,158,11,.15); color: var(--yellow); }
+    .DELETE { background: rgba(239,68,68,.15);  color: var(--red); }
+
+    /* ── Response pane ─────────────────────────────────────────── */
+    .response-pane {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 1rem;
+      overflow: hidden;
+    }
+    .response-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 14px;
+      background: #161b22;
+      border-bottom: 1px solid var(--border);
+      font-size: .78rem; color: var(--muted);
+    }
+    .response-body {
+      padding: 14px;
+      font-size: .8rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      max-height: 320px;
+      overflow-y: auto;
+      white-space: pre;
+    }
+    .status-ok  { color: var(--accent2); font-weight: 700; }
+    .status-err { color: var(--red);     font-weight: 700; }
+    .placeholder { color: var(--muted); font-style: italic; text-align: center; padding: 2rem; }
+
+    /* ── Token display ─────────────────────────────────────────── */
+    .token-box {
+      background: var(--code-bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px;
+      font-size: .78rem; word-break: break-all;
+      color: var(--accent2); margin-top: 8px;
+    }
+    .token-label { color: var(--muted); font-size: .75rem; margin-bottom: 4px; }
+
+    /* ── Section heading ───────────────────────────────────────── */
+    .section-title {
+      font-size: 1.1rem; font-weight: 700;
+      margin: 2.5rem 0 1rem;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── Route table ───────────────────────────────────────────── */
+    .route-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .route-table th { padding: 10px 12px; text-align: left; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); }
+    .route-table td { padding: 10px 12px; border-bottom: 1px solid rgba(46,50,80,.5); }
+    .route-table tr:last-child td { border-bottom: none; }
+    .route-table tr:hover td { background: rgba(99,102,241,.04); }
+    .lock { font-size: .75rem; color: var(--yellow); }
+
+    /* ── Toast ─────────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 20px;
+      font-size: .88rem; opacity: 0; pointer-events: none;
+      transition: opacity .3s; z-index: 999;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    }
+    #toast.show { opacity: 1; }
+    #toast.ok  { border-color: var(--accent2); color: var(--accent2); }
+    #toast.err { border-color: var(--red);     color: var(--red); }
+
+    /* ── Spinner ───────────────────────────────────────────────── */
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Scrollbar ─────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<header>
+  <div class="logo">⚡ SyncCode <span>Backend Demo</span></div>
+  <div class="header-links">
+    <a href="/api/docs" target="_blank">📚 Swagger UI</a>
+    <a href="/api/health" target="_blank">❤️ Health</a>
+    <div id="authBadge" class="badge purple">🔒 Not logged in</div>
+  </div>
+</header>
+
+<!-- ── Hero ────────────────────────────────────────────────────────────── -->
+<div class="hero">
+  <h1>Live <span>API Demo</span></h1>
+  <p>Interactive demonstration of the SyncCode REST API — test JWT auth, RBAC, and room management in real time.</p>
+  <div class="hero-tags">
+    <span class="tag">Node.js + Express</span>
+    <span class="tag">JWT Authentication</span>
+    <span class="tag">Role-Based Access Control</span>
+    <span class="tag">MongoDB + Mongoose</span>
+    <span class="tag">Swagger / OpenAPI 3.0</span>
+  </div>
+</div>
+
+<!-- ── Main content ─────────────────────────────────────────────────────── -->
+<div class="container">
+
+  <!-- ── Step 1: Auth ──────────────────────────────────────────────────── -->
+  <div class="section-title">🔐 Step 1 — Authentication</div>
+  <div class="grid-2">
+
+    <!-- Login -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="method POST">POST</span> /api/auth/login</div>
+        <span class="badge purple">Public</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem;">Use the pre-seeded demo credentials to get a JWT access token.</p>
+        <div class="form-group">
+          <label>Email</label>
+          <select id="loginEmail">
+            <option value="admin@synccode.dev">admin@synccode.dev (admin)</option>
+            <option value="alice@synccode.dev">alice@synccode.dev (user)</option>
+            <option value="bob@synccode.dev">bob@synccode.dev (user)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="text" id="loginPassword" value="Admin@123" />
+        </div>
+        <button class="btn btn-primary" onclick="doLogin()">🔑 Login</button>
+        <div id="loginResponse" class="response-pane" style="display:none">
+          <div class="response-header"><span>Response</span><span id="loginStatus"></span></div>
+          <div class="response-body" id="loginBody"></div>
+        </div>
+        <div id="tokenSection" style="display:none">
+          <div class="token-label" style="margin-top:1rem">✅ Access Token (stored in memory):</div>
+          <div class="token-box mono" id="tokenDisplay"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Get /me -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="method GET">GET</span> /api/auth/me</div>
+        <span class="badge purple">🔒 Requires Token</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem;">Returns the currently authenticated user's profile. Automatically uses the token from login.</p>
+        <div class="btn-row">
+          <button class="btn btn-success" onclick="doMe()">👤 Get My Profile</button>
+          <button class="btn btn-outline" onclick="doLogout()">🚪 Logout</button>
+        </div>
+        <div id="meResponse" class="response-pane" style="display:none">
+          <div class="response-header"><span>Response</span><span id="meStatus"></span></div>
+          <div class="response-body" id="meBody"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Step 2: Register ───────────────────────────────────────────────── -->
+  <div class="section-title">✍️ Step 2 — Register a New User</div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="method POST">POST</span> /api/auth/register</div>
+      <span class="badge purple">Public — Input Validation + bcrypt hashing</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2">
+        <div>
+          <div class="form-group"><label>Username (3–30 chars)</label><input id="regUsername" value="charlie" /></div>
+          <div class="form-group"><label>Email</label><input id="regEmail" value="charlie@example.com" /></div>
+          <div class="form-group"><label>Password (min 8, needs uppercase + number)</label><input id="regPassword" value="Charlie@1" /></div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="doRegister()">✨ Register</button>
+            <button class="btn btn-outline" onclick="fillBadReg()">⚠️ Try Invalid Data</button>
+          </div>
+        </div>
+        <div>
+          <div id="regResponse" class="response-pane" style="min-height:160px">
+            <div class="response-header"><span>Response</span></div>
+            <div class="response-body placeholder">Click Register to test →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Step 3: Rooms ──────────────────────────────────────────────────── -->
+  <div class="section-title">🏠 Step 3 — Room Management</div>
+  <div class="grid-2">
+
+    <!-- List rooms -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="method GET">GET</span> /api/rooms</div>
+        <span class="badge purple">🔒 Auth Required</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem;">Returns rooms you own, are a member of, or are public. Supports pagination and filtering.</p>
+        <div class="form-group">
+          <label>Filter</label>
+          <select id="roomFilter">
+            <option value="">All accessible rooms</option>
+            <option value="?isPublic=true">Public rooms only</option>
+            <option value="?language=javascript">JavaScript rooms</option>
+            <option value="?limit=1">Limit to 1 result</option>
+          </select>
+        </div>
+        <button class="btn btn-success" onclick="listRooms()">📋 List Rooms</button>
+        <div id="listResponse" class="response-pane" style="display:none">
+          <div class="response-header"><span>Response</span><span id="listStatus"></span></div>
+          <div class="response-body" id="listBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create room -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="method POST">POST</span> /api/rooms</div>
+        <span class="badge purple">🔒 Auth Required</span>
+      </div>
+      <div class="card-body">
+        <div class="form-group"><label>Room Name</label><input id="roomName" value="My Demo Room" /></div>
+        <div class="form-group">
+          <label>Language</label>
+          <select id="roomLang">
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="typescript">TypeScript</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Visibility</label>
+          <select id="roomPublic">
+            <option value="false">🔒 Private</option>
+            <option value="true">🌍 Public</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="createRoom()">➕ Create Room</button>
+        <div id="createResponse" class="response-pane" style="display:none">
+          <div class="response-header"><span>Response</span><span id="createStatus"></span></div>
+          <div class="response-body" id="createBody"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Step 4: RBAC Demo ──────────────────────────────────────────────── -->
+  <div class="section-title">🛡️ Step 4 — Role-Based Access Control (RBAC)</div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="method GET">GET</span> /api/users — Admin only</div>
+      <span class="badge" style="background:rgba(245,158,11,.15);color:var(--yellow)">🔒 Admin Role Required</span>
+    </div>
+    <div class="card-body">
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.2rem;">
+        The <strong>List Users</strong> endpoint requires the <code>admin</code> role.
+        Login as <strong>alice@synccode.dev</strong> (user role) and try — you'll get <code>403 Forbidden</code>.
+        Then login as <strong>admin@synccode.dev</strong> and try again to see it work.
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="listUsers()">👥 List All Users</button>
+        <button class="btn btn-danger"  onclick="tryForbidden()">🚫 Test Without Token</button>
+      </div>
+      <div id="usersResponse" class="response-pane" style="display:none">
+        <div class="response-header"><span>Response</span><span id="usersStatus"></span></div>
+        <div class="response-body" id="usersBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Architecture ──────────────────────────────────────────────────── -->
+  <div class="section-title">🏗️ Architecture Overview</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">📁 Project Structure</div></div>
+      <div class="card-body">
+        <pre style="font-size:.8rem;color:var(--muted);line-height:1.9">backend/
+├── <span style="color:var(--accent)">src/</span>
+│   ├── <span style="color:var(--accent2)">config/</span>         DB, Swagger, app config
+│   ├── <span style="color:var(--accent2)">models/</span>         User, Room (Mongoose)
+│   ├── <span style="color:var(--accent2)">services/</span>       Business logic layer
+│   ├── <span style="color:var(--accent2)">controllers/</span>    HTTP request handlers
+│   ├── <span style="color:var(--accent2)">routes/</span>         Express routers
+│   ├── <span style="color:var(--accent2)">middlewares/</span>    Auth, validate, rate-limit
+│   ├── <span style="color:var(--accent2)">validators/</span>     Joi schemas
+│   └── <span style="color:var(--accent2)">utils/</span>          Logger, apiResponse
+├── <span style="color:var(--yellow)">tests/</span>              Jest + Supertest
+├── <span style="color:var(--yellow)">scripts/</span>            Seed script
+├── app.js              Express app factory
+├── server.js           HTTP server
+└── demo-server.js      ← <span style="color:var(--accent2)">You are here</span></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">🔐 Auth Flow</div></div>
+      <div class="card-body">
+        <pre style="font-size:.8rem;color:var(--muted);line-height:2.0">1. <span style="color:var(--text)">POST /api/auth/register</span>
+   → bcrypt hashes password (12 rounds)
+   → stores user in MongoDB
+   → returns accessToken (15 min)
+
+2. <span style="color:var(--text)">POST /api/auth/login</span>
+   → timing-safe password check
+   → issues accessToken (JWT, 15 min)
+   → issues refreshToken (7 days)
+   → refreshToken stored as HASH in DB
+
+3. <span style="color:var(--text)">Protected route request</span>
+   → verifyToken middleware
+   → decodes JWT → fetches user from DB
+   → checks isActive flag
+   → attaches req.user
+
+4. <span style="color:var(--text)">POST /api/auth/refresh</span>
+   → verifies refresh JWT signature
+   → finds hashed token in DB
+   → rotates: old token removed, new pair issued</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Route Reference ────────────────────────────────────────────────── -->
+  <div class="section-title">📡 Full API Reference</div>
+  <div class="card">
+    <div class="card-body" style="padding: 0">
+      <table class="route-table">
+        <thead>
+          <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th></tr>
+        </thead>
+        <tbody id="routeTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:3rem 0;color:var(--muted);font-size:.85rem">
+    Built with ❤️ · Node.js · Express · MongoDB · JWT · Swagger<br/>
+    <a href="/api/docs" style="color:var(--accent);text-decoration:none">Open Swagger UI →</a>
+  </div>
+</div>
+
+<!-- ── Toast ─────────────────────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<script>
+  // ── State ────────────────────────────────────────────────────────────────
+  let accessToken = null;
+  const BASE = '/api';
+
+  // ── UI helpers ───────────────────────────────────────────────────────────
+  function toast(msg, type = 'ok') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = `show ${type}`;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.className = ''; }, 3500);
+  }
+
+  function showResponse(paneId, statusId, bodyId, status, data) {
+    const pane   = document.getElementById(paneId);
+    const stat   = document.getElementById(statusId);
+    const body   = document.getElementById(bodyId);
+    const ok     = status >= 200 && status < 300;
+    pane.style.display = 'block';
+    stat.innerHTML = `<span class="${ok ? 'status-ok' : 'status-err'}">${status}</span>`;
+    body.textContent   = JSON.stringify(data, null, 2);
+  }
+
+  function setLoading(btn, loading) {
+    if (loading) {
+      btn._text = btn.innerHTML;
+      btn.innerHTML = '<div class="spinner"></div> Loading…';
+      btn.disabled = true;
+    } else {
+      btn.innerHTML = btn._text;
+      btn.disabled = false;
+    }
+  }
+
+  async function api(method, path, body, withAuth = true) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (withAuth && accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+    const res  = await fetch(BASE + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    const json = await res.json().catch(() => ({ error: 'Non-JSON response' }));
+    return { status: res.status, data: json };
+  }
+
+  // ── Auth actions ─────────────────────────────────────────────────────────
+  async function doLogin() {
+    const email    = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const btn      = event.target;
+    setLoading(btn, true);
+    try {
+      const { status, data } = await api('POST', '/auth/login', { email, password }, false);
+      showResponse('loginResponse', 'loginStatus', 'loginBody', status, data);
+      if (data.success && data.data?.accessToken) {
+        accessToken = data.data.accessToken;
+        document.getElementById('tokenSection').style.display = 'block';
+        document.getElementById('tokenDisplay').textContent   = accessToken.substring(0, 60) + '…';
+        document.getElementById('authBadge').innerHTML = `✅ ${data.data.user.username} (${data.data.user.role})`;
+        document.getElementById('authBadge').className = 'badge green';
+        toast(`✅ Logged in as ${data.data.user.username}`);
+        // Match password field to selected email
+      } else {
+        toast('❌ Login failed', 'err');
+      }
+    } finally { setLoading(btn, false); }
+  }
+
+  async function doMe() {
+    const btn = event.target;
+    setLoading(btn, true);
+    try {
+      const { status, data } = await api('GET', '/auth/me');
+      showResponse('meResponse', 'meStatus', 'meBody', status, data);
+      toast(status === 200 ? '👤 Profile loaded' : '❌ Auth failed', status === 200 ? 'ok' : 'err');
+    } finally { setLoading(btn, false); }
+  }
+
+  async function doLogout() {
+    await api('POST', '/auth/logout', {});
+    accessToken = null;
+    document.getElementById('tokenSection').style.display = 'none';
+    document.getElementById('authBadge').className = 'badge purple';
+    document.getElementById('authBadge').innerHTML = '🔒 Not logged in';
+    toast('🚪 Logged out');
+  }
+
+  // ── Register ─────────────────────────────────────────────────────────────
+  async function doRegister() {
+    const btn = event.target;
+    setLoading(btn, true);
+    try {
+      const { status, data } = await api('POST', '/auth/register', {
+        username: document.getElementById('regUsername').value,
+        email:    document.getElementById('regEmail').value,
+        password: document.getElementById('regPassword').value,
+      }, false);
+      const pane = document.getElementById('regResponse');
+      pane.innerHTML = `
+        <div class="response-header"><span>Response</span>
+          <span class="${status < 300 ? 'status-ok' : 'status-err'}">${status}</span>
+        </div>
+        <div class="response-body">${JSON.stringify(data, null, 2)}</div>`;
+      toast(data.success ? '✅ Registered!' : '❌ ' + data.message, data.success ? 'ok' : 'err');
+    } finally { setLoading(btn, false); }
+  }
+
+  function fillBadReg() {
+    document.getElementById('regUsername').value = 'a';        // too short
+    document.getElementById('regEmail').value    = 'notvalid'; // bad email
+    document.getElementById('regPassword').value = '123';      // weak
+    toast('⚠️ Filled with invalid data — now click Register', 'err');
+  }
+
+  // ── Rooms ─────────────────────────────────────────────────────────────────
+  async function listRooms() {
+    const filter = document.getElementById('roomFilter').value;
+    const btn    = event.target;
+    setLoading(btn, true);
+    try {
+      const { status, data } = await api('GET', '/rooms' + filter);
+      showResponse('listResponse', 'listStatus', 'listBody', status, data);
+      toast(status === 200 ? `📋 ${data.meta?.total ?? '?'} rooms found` : '❌ Failed', status === 200 ? 'ok':'err');
+    } finally { setLoading(btn, false); }
+  }
+
+  async function createRoom() {
+    const btn = event.target;
+    setLoading(btn, true);
+    try {
+      const { status, data } = await api('POST', '/rooms', {
+        name:     document.getElementById('roomName').value,
+        language: document.getElementById('roomLang').value,
+        isPublic: document.getElementById('roomPublic').value === 'true',
+      });
+      showResponse('createResponse', 'createStatus', 'createBody', status, data);
+      toast(data.success ? `✅ Room "${data.data?.name}" created!` : '❌ ' + data.message, data.success ? 'ok':'err');
+    } finally { setLoading(btn, false); }
+  }
+
+  // ── RBAC ──────────────────────────────────────────────────────────────────
+  async function listUsers() {
+    const btn = event.target;
+    setLoading(btn, true);
+    try {
+      const { status, data } = await api('GET', '/users');
+      showResponse('usersResponse', 'usersStatus', 'usersBody', status, data);
+      if (status === 403) toast('🚫 403 Forbidden — admin only!', 'err');
+      else if (status === 401) toast('🔒 401 — Login first', 'err');
+      else toast(`👥 ${data.meta?.total ?? '?'} users listed`);
+    } finally { setLoading(btn, false); }
+  }
+
+  async function tryForbidden() {
+    const saved = accessToken;
+    accessToken  = null; // temporarily clear token
+    const { status, data } = await api('GET', '/users');
+    accessToken  = saved;
+    showResponse('usersResponse', 'usersStatus', 'usersBody', status, data);
+    toast('🔒 401 Unauthorized — no token provided', 'err');
+  }
+
+  // ── Auto-sync password field with email selection ─────────────────────────
+  document.getElementById('loginEmail').addEventListener('change', (e) => {
+    const map = {
+      'admin@synccode.dev': 'Admin@123',
+      'alice@synccode.dev': 'Alice@123',
+      'bob@synccode.dev':   'Bob@1234',
+    };
+    document.getElementById('loginPassword').value = map[e.target.value] || '';
+  });
+
+  // ── Route table ───────────────────────────────────────────────────────────
+  const ROUTES = [
+    ['POST',  '/auth/register',              'Register new user',                  'Public'],
+    ['POST',  '/auth/login',                 'Login → access + refresh tokens',    'Public'],
+    ['GET',   '/auth/me',                    'Get current user profile',           '🔒 Auth'],
+    ['POST',  '/auth/refresh',               'Refresh access token',               'Public'],
+    ['POST',  '/auth/logout',                'Logout current session',             '🔒 Auth'],
+    ['GET',   '/users',                      'List all users (paginated)',          '🔒 Admin'],
+    ['GET',   '/users/:id',                  'Get user profile by ID',             '🔒 Auth'],
+    ['PATCH', '/users/:id',                  'Update username / avatar / password','🔒 Auth'],
+    ['DELETE','/users/:id',                  'Delete (deactivate) account',        '🔒 Auth'],
+    ['GET',   '/rooms',                      'List accessible rooms',              '🔒 Auth'],
+    ['POST',  '/rooms',                      'Create a new room',                  '🔒 Auth'],
+    ['GET',   '/rooms/:roomId',              'Get room details + members',         '🔒 Auth'],
+    ['PATCH', '/rooms/:roomId',              'Update room settings',               '🔒 Owner'],
+    ['DELETE','/rooms/:roomId',              'Delete room',                        '🔒 Owner'],
+    ['POST',  '/rooms/:roomId/members',      'Add or update a member',             '🔒 Owner'],
+    ['DELETE','/rooms/:roomId/members/:uid', 'Remove a member',                    '🔒 Owner'],
+    ['POST',  '/rooms/:roomId/snapshot',     'Save code snapshot',                 '🔒 Editor'],
+    ['GET',   '/health',                     'Server + DB health status',          'Public'],
+  ];
+
+  const tbody = document.getElementById('routeTable');
+  ROUTES.forEach(([method, path, desc, auth]) => {
+    const tr      = document.createElement('tr');
+    const lock    = auth !== 'Public' ? `<span class="lock"> ${auth}</span>` : `<span style="color:var(--accent2)">${auth}</span>`;
+    tr.innerHTML  = `<td><span class="method ${method}">${method}</span></td><td class="mono" style="font-size:.82rem">${path}</td><td>${desc}</td><td>${lock}</td>`;
+    tbody.appendChild(tr);
+  });
+</script>
+</body>
+</html>

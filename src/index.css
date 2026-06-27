@@ -8,3 +8,28 @@ body {
     -moz-osx-font-smoothing: grayscale;
     background: #1c1e29;
 }
+
+/* Yjs Collaborative Cursors */
+.yjs-cursor {
+  position: absolute;
+  border-left: 2px solid; /* color set dynamically */
+}
+.yjs-cursor > div {
+  position: absolute;
+  top: -1.2em;
+  left: -2px;
+  font-size: 11px;
+  font-family: inherit;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  user-select: none;
+  color: white;
+  padding: 1px 4px;
+  border-radius: 4px;
+  border-bottom-left-radius: 0;
+  z-index: 10;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 1;
+}

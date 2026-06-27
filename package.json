@@ -3,12 +3,22 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
+        "@google/genai": "^1.48.0",
+        "@google/generative-ai": "^0.24.1",
         "@testing-library/jest-dom": "^5.16.4",
         "@testing-library/react": "^14.2.1",
         "@testing-library/user-event": "^13.5.0",
+        "@xterm/addon-fit": "^0.11.0",
+        "@xterm/xterm": "^6.0.0",
+        "bcryptjs": "^3.0.3",
         "codemirror": "^5.65.2",
+        "dotenv": "^17.4.0",
         "express": "^4.21.2",
+        "jsonwebtoken": "^9.0.3",
+        "mongoose": "^8.18.0",
+        "node-pty": "^1.1.0",
         "pm2": "^5.3.1",
+        "randomcolor": "^0.6.2",
         "react": "^18.0.0",
         "react-avatar": "^4.0.0",
         "react-dom": "^18.0.0",
@@ -19,11 +29,16 @@
         "socket.io": "^4.4.1",
         "socket.io-client": "^4.4.1",
         "uuid": "^8.3.2",
-        "web-vitals": "^2.1.4"
+        "web-vitals": "^2.1.4",
+        "ws": "^8.20.0",
+        "y-codemirror": "^3.0.1",
+        "y-websocket": "^3.0.0",
+        "yjs": "^13.6.30"
     },
     "scripts": {
         "start:docker": "pm2 start server.js && npm start",
-        "start": "react-scripts start",
+        "start": "concurrently \"npm run server:dev\" \"react-scripts start\"",
+        "client": "react-scripts start",
         "build": "react-scripts build",
         "build:digitalocean": "npm install --force && react-scripts build",
         "server:dev": "nodemon server.js",
@@ -31,6 +46,7 @@
         "test": "react-scripts test",
         "eject": "react-scripts eject"
     },
+    "proxy": "http://localhost:5001",
     "eslintConfig": {
         "extends": [
             "react-app",
@@ -50,6 +66,9 @@
         ]
     },
     "devDependencies": {
+        "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+        "@babel/plugin-transform-private-property-in-object": "^7.28.6",
+        "concurrently": "^9.2.1",
         "nodemon": "^2.0.15"
     }
 }
